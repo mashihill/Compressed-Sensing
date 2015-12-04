@@ -8,43 +8,22 @@ import scipy.io as sio
 import scipy.fftpack as fft
 import random
 import math
-from skimage import img_as_float
 
-from numpy import empty,arange,exp,real,imag,pi
-from numpy.fft import rfft,irfft
 
-def dct(y):
-    N = len(y)
-    y2 = empty(2*N,float)
-    y2[:N] = y[:]
-    y2[N:] = y[::-1]
 
-    c = rfft(y2)
-    phi = exp(-1j*pi*arange(N)/(2*N))
-    return real(phi*c[:N])
+def get_2D_dct(img):
+    """ Get 2D Cosine Transform of Image
+    """
+    return fft.dct(fft.dct(img.T, norm='ortho').T, norm='ortho')
 
-def dct2(y):
-    M = y.shape[0]
-    N = y.shape[1]
-    a = empty([M,N],float)
-    b = empty([M,N],float)
-
-    for i in range(M):
-        a[i,:] = dct(y[i,:])
-    for j in range(N):
-        b[:,j] = dct(a[:,j])
-
-    return b
 
 matfn = './data33.mat'
 data = sio.loadmat(matfn)
 mat4py_load = data['data33']
-#u = fft.dct(img_as_float(mat4py_load[:,:,0]))
-#u = fft.dct((mat4py_load[:,:,0]).astype(float), type=3)
-u = dct2((mat4py_load[:,:,0]).astype(float))
+u = get_2D_dct((mat4py_load[:,:,0]).astype(float))
 N = u.shape[0]
-eps = 1
-p = 1
+eps = 1.0
+p = 1.0
 M = N/2
 
 #phi = np.random.rand(M, N)
@@ -58,11 +37,29 @@ b = np.dot(phi, u);
 u = np.dot(phi.transpose(), (np.linalg.solve((np.dot(phi, phi.transpose())), b)))
 
 """
-Run the algorithm
-IRLS
+IRLS Begin
 """
 
+#while(eps > 10**(-8)):
+#    weights=(u.^2+eps).^(p/2 - 1);
+#    for i in range(N)
+#        Q=diag(weights(:,i).^(-1));
+#        u(:,i)=Q*phi'*((phi*Q*phi')\b(:,i));
+#    end
+#    
+#    currObj=sum(sum(weights.*(u.^2)))/10000;
+#    
+#    
+#    if abs(currObj-prevObj)/currObj < sqrt(eps)/100
+#        eps=eps/10;
+#    end
+#    prevObj=currObj;
+#end
+
+
+"""
+IRLS End
+"""
 #print(mat4py_load[:,:,1])
 print 'b: ', b, b.shape
-print 
 print 'u: ', u
