@@ -3,6 +3,7 @@
 
 
 import numpy as np
+import numpy.matlib
 #import cv2
 import scipy.io as sio
 import scipy.fftpack as fft
@@ -20,41 +21,38 @@ def get_2D_dct(img):
 matfn = './data33.mat'
 data = sio.loadmat(matfn)
 mat4py_load = data['data33']
-u = get_2D_dct((mat4py_load[:,:,0]).astype(float))
+u = np.matrix(get_2D_dct((mat4py_load[:,:,0]).astype(float)))
 N = u.shape[0]
 eps = 1.0
 p = 1.0
 M = N/2
 
-#phi = np.random.rand(M, N)
-phi = np.eye(M, N)
+phi = np.matrix(np.random.rand(M, N))
+#phi = np.matlib.eye(M, N)
 phi = ((phi >= .5).astype(int) - (phi < .5).astype(int)) / math.sqrt(M)
 
 print 'phi: ', phi
 print 'u0: ', u
 
-b = np.dot(phi, u);
-u = np.dot(phi.transpose(), (np.linalg.solve((np.dot(phi, phi.transpose())), b)))
+b = phi * u;
+u = phi.T * (np.linalg.solve((phi * phi.T), b))
 
 """
 IRLS Begin
 """
+prevObj = None
+while eps > 10**(-8):
+    weights = np.power((np.power(u, 2)+eps), (p/2 - 1))
+    for i in range(N):
+        Q = np.diag(np.array(np.power(weights[:,i], -1).ravel())[0])
+        u[:,i] = Q * phi.T * (np.linalg.solve((phi * Q * phi.T) , b[:,i]))
+    currObj = np.sum(np.multiply(weights,np.power(u, 2)))/10000;
 
-#while(eps > 10**(-8)):
-#    weights=(u.^2+eps).^(p/2 - 1);
-#    for i in range(N)
-#        Q=diag(weights(:,i).^(-1));
-#        u(:,i)=Q*phi'*((phi*Q*phi')\b(:,i));
-#    end
-#    
-#    currObj=sum(sum(weights.*(u.^2)))/10000;
-#    
-#    
-#    if abs(currObj-prevObj)/currObj < sqrt(eps)/100
-#        eps=eps/10;
-#    end
-#    prevObj=currObj;
-#end
+    if prevObj:
+        if abs(currObj - prevObj) / currObj < math.sqrt(eps)/100:
+            eps = eps/10;
+    prevObj=currObj;
+
 
 
 """
