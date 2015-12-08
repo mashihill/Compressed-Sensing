@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
+from scipy.misc import toimage
 import numpy as np
 import numpy.matlib
 #import cv2
@@ -16,7 +16,10 @@ def get_2D_dct(img):
     """ Get 2D Cosine Transform of Image
     """
     return fft.dct(fft.dct(img.T, norm='ortho').T, norm='ortho')
-
+def get_2d_idct(coefficients):
+    """ Get 2D Inverse Cosine Transform of Image
+    """
+    return fft.idct(fft.idct(coefficients.T, norm='ortho').T, norm='ortho')
 
 matfn = './data33.mat'
 data = sio.loadmat(matfn)
@@ -26,6 +29,8 @@ N = u.shape[0]
 eps = 1.0
 p = 1.0
 M = N/2
+
+reconstructedImages = np.matlib.zeros(u.shape)
 
 phi = np.matrix(np.random.rand(M, N))
 #phi = np.matlib.eye(M, N)
@@ -53,7 +58,8 @@ while eps > 10**(-8):
             eps = eps/10;
     prevObj=currObj;
 
-
+reconstructedImages = get_2d_idct(u)
+toimage(reconstructedImages).show()
 
 """
 IRLS End
