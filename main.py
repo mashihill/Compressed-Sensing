@@ -9,7 +9,7 @@ import scipy.io as sio
 import scipy.fftpack as fft
 import random
 import math
-
+import dicom
 
 
 def get_2D_dct(img):
@@ -22,9 +22,11 @@ def get_2d_idct(coefficients):
     return fft.idct(fft.idct(coefficients.T, norm='ortho').T, norm='ortho')
 
 matfn = './data33.mat'
-data = sio.loadmat(matfn)
-mat4py_load = data['data33']
-u = np.matrix(get_2D_dct((mat4py_load[:,:,0]).astype(float)))
+#data = sio.loadmat(matfn)
+data = dicom.read_file('./fSer1001_0.dcm')
+#mat4py_load = data['data33']
+mat4py_load = data.pixel_array
+u = np.matrix(get_2D_dct((mat4py_load).astype(float)))
 N = u.shape[0]
 eps = 1.0
 p = 1.0
