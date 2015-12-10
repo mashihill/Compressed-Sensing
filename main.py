@@ -38,8 +38,8 @@ for i in xrange(ImageCount):
     eps = 1.0
     p = p0
     M = N / ratio
-    print u.shape
-    ResultImages = np.matlib.zeros(u.shape)
+    ResultImages = np.matlib.zeros((u.shape[0], u.shape[1] * 2))
+    ResultImages[:,:(ResultImages.shape / 2)] = data
     phi = np.matrix(np.random.rand(M, N))
     #phi = np.matlib.eye(M, N)
     phi = ((phi >= .5).astype(int) - (phi < .5).astype(int)) / math.sqrt(M)
@@ -51,7 +51,7 @@ for i in xrange(ImageCount):
     """
     print 'IRLS Begin', i
     prevObj = None
-    while eps > 10**(-8):
+    while eps > 10**(1):
         weights = np.power((np.power(u, 2)+eps), (p/2 - 1))
         for i in range(N):
             Q = np.diag(np.array(np.power(weights[:,i], -1).ravel())[0])
@@ -63,7 +63,8 @@ for i in xrange(ImageCount):
                 eps = eps/10;
         prevObj=currObj;
 
-    ResultImages = get_2d_idct(u)
+    ResultImages[:,(ResultImages.shape / 2) + 1:] = get_2d_idct(u)
+    #ResultImages[:] = get_2d_idct(u)
     toimage(ResultImages).show()
 
 """
