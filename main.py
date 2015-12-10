@@ -23,15 +23,15 @@ def get_2d_idct(coefficients):
     return fft.idct(fft.idct(coefficients.T, norm='ortho').T, norm='ortho')
 
 ImageCount = 10
-FileName = ["CT-MONO2-16-ankle","ILIACSM.bmp","IM_0001","MOVEKNEE.bmp","MR-MONO2-16-head","MR-MONO2-16-knee","ONECSPIN.bmp","ONEHEART.bmp","ONESHLDR.bmp","fSer1001_0.dcm","fSer1001_1.dcm","fSer1001_11.dcm"]
+FileName = ["CT-MONO2-16-ankle","ILIACSM.bmp","IM_0001.bmp","MOVEKNEE.bmp","MR-MONO2-16-head","MR-MONO2-16-knee","ONECSPIN.bmp","ONEHEART.bmp","ONESHLDR.bmp","fSer1001_1.dcm"]
 p0 = 1.0
 ratio = 2
 
 for i in xrange(ImageCount):
     if (FileName[i][-1] == 'p'):
-        data = misc.imread('./' + FileName[i])
+        data = misc.imread('./imgdata/' + FileName[i])
     else:
-        data = dicom.read_file('./' + FileName[i]).pixel_array
+        data = dicom.read_file('./imgdata/' + FileName[i]).pixel_array
     print data.shape
     u = np.matrix(get_2D_dct((data).astype(float)))
     N = u.shape[0]
@@ -51,7 +51,7 @@ for i in xrange(ImageCount):
     """
     print 'IRLS Begin', i
     prevObj = None
-    while eps > 10**(1):
+    while eps > 10**(-8):
         weights = np.power((np.power(u, 2)+eps), (p/2 - 1))
         for i in range(N):
             Q = np.diag(np.array(np.power(weights[:,i], -1).ravel())[0])
