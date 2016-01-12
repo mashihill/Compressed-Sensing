@@ -24,21 +24,27 @@ def get_2d_idct(coefficients):
     """
     return fft.idct(fft.idct(coefficients.T, norm='ortho').T, norm='ortho')
 
-FileName = ["CT-MONO2-16-ankle","ILIACSM.bmp","IM_0001.bmp","MOVEKNEE.bmp","MR-MONO2-16-head","ONECSPIN.bmp","ONEHEART.bmp","ONESHLDR.bmp","fSer1001_1.dcm"]
+#FileName = ["CT-MONO2-16-ankle","ILIACSM.bmp","IM_0001.bmp","MOVEKNEE.bmp","MR-MONO2-16-head","ONECSPIN.bmp","ONEHEART.bmp","ONESHLDR.bmp","fSer1001_1.dcm"]
+FileName = ["0.bmp","1.bmp","MOVEKNEE.bmp","MR-MONO2-16-head","ONECSPIN.bmp","ONEHEART.bmp","8.bmp"]
 p0 = 1.0
 ratio = 2
 #rms = np.matlib.zeros([3,len(FileName)])
 rms_all = []
 
-for ratio in [0.9,0.8,0.7,0.6,0.5]:
+#for ratio in np.linspace(1, 0.05, 20):
+for ratio in [ 0.5 ]:
     rms = []
-    for j in xrange(len(FileName)):
-#for i in xrange(3, 4):
+    #for j in xrange(len(FileName)):
+    for j in xrange(3, 4):
         if (FileName[j][-1] == 'p'):
             data = misc.imread('./imgdata/' + FileName[j])
         else:
             data = dicom.read_file('./imgdata/' + FileName[j]).pixel_array
         print data.shape
+        #if data.shape[0] == 512:
+        #    toimage(np.matrix((data).astype(float))).save( str(j) + '.bmp')
+        if j == 0 or j == 1 or j == 6:
+            data = data[:,:,0]
         u = np.matrix(get_2D_dct((data).astype(float)))
         N = u.shape[0]
         eps = 1.0
@@ -53,6 +59,7 @@ for ratio in [0.9,0.8,0.7,0.6,0.5]:
         #phi = ((phi >= .5).astype(int) - (phi < .5).astype(int)) / math.sqrt(M)
         phi = np.matrix(np.random.normal(0, math.sqrt(M), (M, N)))#phi / math.sqrt(M)
         b = phi * u;
+        phi = np.matrix(np.random.normal(0, math.sqrt(M), (M, N)))#phi / math.sqrt(M)
         u = phi.T * (np.linalg.solve((phi * phi.T), b))
         u0 = np.matlib.zeros(u.shape)
         u0[:,:] = u[:,:]
@@ -73,12 +80,12 @@ for ratio in [0.9,0.8,0.7,0.6,0.5]:
                 if abs(currObj - prevObj) / currObj < math.sqrt(eps)/100:
                     eps = eps/10;
             prevObj=currObj;
-        rms.append ([rmse(u, data), rmse(u, u0), rmse(u0, data)])
-        print rms
+        #rms.append ([rmse(u, data), rmse(u, u0), rmse(u0, data)])
+        #print rms
         ResultImages[:,(u.shape[1]) * 2 + 100:] = get_2d_idct(u)
         #ResultImages[:] = get_2d_idct(u)
-        toimage(ResultImages).save( 'no_' + str(j) + '_ratio_' + str(ratio) + '.jpg')
-    rms_all.append(rms)
+        toimage(ResultImages).save( './test.jpg')
+    #rms_all.append(rms)
     print rms_all
 
 """
